@@ -18,12 +18,16 @@ export default function MyRegistrationsPage({ onOpenAuth }) {
   }, [user, token, isLoggedIn]);
 
   const fetchRegistrations = async () => {
-    if (!token) return;
+    const activeToken = token || localStorage.getItem('vesit_token') || localStorage.getItem('college_token');
+    if (!activeToken) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
       const res = await fetch('/api/registrations/my', {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': `Bearer ${activeToken}` }
       });
       const data = await res.json();
       if (data.success) {

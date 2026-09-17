@@ -38,9 +38,10 @@ export default function HomePage({ onViewRegistrations, onNavigateToAdmin, onOpe
       }
 
       // Fetch recommendations if token present
-      if (token) {
+      const activeToken = token || localStorage.getItem('vesit_token') || localStorage.getItem('college_token');
+      if (activeToken) {
         const recRes = await fetch('/api/events/recommendations', {
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { 'Authorization': `Bearer ${activeToken}` }
         });
         const recData = await recRes.json();
         if (recData.success) {
@@ -55,13 +56,17 @@ export default function HomePage({ onViewRegistrations, onNavigateToAdmin, onOpe
   };
 
   const fetchUserRegistrations = async () => {
-    if (!token) return;
+    const activeToken = token || localStorage.getItem('vesit_token') || localStorage.getItem('college_token');
+    if (!activeToken) {
+      setUserRegistrations([]);
+      return;
+    }
     try {
       const res = await fetch('/api/registrations/my', {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': `Bearer ${activeToken}` }
       });
       const data = await res.json();
-      if (data.success) {
+      if (data.success && Array.isArray(data.registrations)) {
         setUserRegistrations(data.registrations);
       }
     } catch (err) {
@@ -229,7 +234,7 @@ export default function HomePage({ onViewRegistrations, onNavigateToAdmin, onOpe
 
           <div className="events-responsive-grid">
             {recommendations.slice(0, 2).map(event => {
-              const reg = userRegistrations.find(r => r.event_id === event.event_id);
+              const reg = userRegistrations.find(r => Number(r.event_id) === Number(event.event_id));
               return (
                 <EventCard
                   key={`rec-${event.event_id}`}
@@ -310,7 +315,7 @@ export default function HomePage({ onViewRegistrations, onNavigateToAdmin, onOpe
         ) : (
           <div className="events-responsive-grid">
             {filteredEvents.map(event => {
-              const reg = userRegistrations.find(r => r.event_id === event.event_id);
+              const reg = userRegistrations.find(r => Number(r.event_id) === Number(event.event_id));
               return (
                 <EventCard
                   key={event.event_id}

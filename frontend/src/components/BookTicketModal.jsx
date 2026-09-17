@@ -25,11 +25,12 @@ export default function BookTicketModal({ event, isOpen, onClose, onSuccess, onO
     setConflictError(null);
 
     try {
+      const activeToken = token || localStorage.getItem('vesit_token') || localStorage.getItem('college_token');
       const res = await fetch('/api/registrations', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${activeToken}`
         },
         body: JSON.stringify({ event_id: event.event_id })
       });
@@ -43,6 +44,20 @@ export default function BookTicketModal({ event, isOpen, onClose, onSuccess, onO
       }
 
       if (!res.ok) {
+        if (data.message && (data.message.includes('already registered') || data.message.includes('already on the waitlist'))) {
+          showToast(data.message, 'info');
+          if (onSuccess) onSuccess(null);
+          onClose();
+          return;
+        }
+
+        if (res.status === 401) {
+          showToast('Session expired. Please sign in again.', 'error');
+          onClose();
+          if (onOpenAuth) onOpenAuth();
+          return;
+        }
+
         showToast(data.message || 'Registration failed.', 'error');
         return;
       }

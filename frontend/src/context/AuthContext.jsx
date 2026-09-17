@@ -19,9 +19,12 @@ export function AuthProvider({ children }) {
   // Sync user state to localStorage
   useEffect(() => {
     if (user) {
-      localStorage.setItem('vesit_user', JSON.stringify(user));
+      const userStr = JSON.stringify(user);
+      localStorage.setItem('vesit_user', userStr);
+      localStorage.setItem('college_user', userStr);
     } else {
       localStorage.removeItem('vesit_user');
+      localStorage.removeItem('college_user');
     }
   }, [user]);
 
@@ -29,30 +32,38 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (token) {
       localStorage.setItem('vesit_token', token);
+      localStorage.setItem('college_token', token);
     } else {
       localStorage.removeItem('vesit_token');
+      localStorage.removeItem('college_token');
     }
   }, [token]);
 
   // Verify JWT session with backend on application load
   useEffect(() => {
     async function verifySession() {
-      if (!token) {
+      const activeToken = token || localStorage.getItem('vesit_token') || localStorage.getItem('college_token');
+      if (!activeToken) {
         setIsLoadingAuth(false);
         return;
       }
 
       try {
         const res = await fetch('/api/auth/profile', {
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { 'Authorization': `Bearer ${activeToken}` }
         });
         const data = await res.json();
         if (data.success && data.user) {
           setUser(data.user);
+          if (!token) setToken(activeToken);
         } else {
-          // Token expired or invalid
+          // Token expired or invalid: reset clean
           setUser(null);
           setToken(null);
+          localStorage.removeItem('vesit_user');
+          localStorage.removeItem('vesit_token');
+          localStorage.removeItem('college_token');
+          localStorage.removeItem('college_user');
         }
       } catch (err) {
         console.warn('Network error checking session:', err);
