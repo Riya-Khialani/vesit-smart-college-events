@@ -167,7 +167,7 @@ async function getProfile(req, res) {
     let user;
 
     if (db.isFallback()) {
-      user = db.getMockData().users.find(u => u.user_id === userId);
+      user = db.getMockData().users.find(u => Number(u.user_id) === Number(userId));
     } else {
       const rows = await db.query('SELECT user_id, name, email, role, department, interests, created_at FROM users WHERE user_id = ?', [userId]);
       user = rows[0];
@@ -234,11 +234,12 @@ async function updateUserRole(req, res) {
     }
 
     if (db.isFallback()) {
-      const user = db.getMockData().users.find(u => u.user_id === targetUserId);
+      const user = db.getMockData().users.find(u => Number(u.user_id) === targetUserId);
       if (!user) {
         return res.status(404).json({ success: false, message: 'User not found.' });
       }
       user.role = role;
+      if (db.saveStore) db.saveStore();
       return res.json({
         success: true,
         message: `Updated role for ${user.name} to ${role}.`,

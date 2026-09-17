@@ -23,9 +23,9 @@ export default function ConflictModal({ conflictData, onClose }) {
             position: 'absolute',
             top: '18px',
             right: '18px',
-            background: 'rgba(255, 255, 255, 0.08)',
-            border: 'none',
-            color: '#fff',
+            background: 'var(--bg-surface-elevated)',
+            border: '1px solid var(--border-subtle)',
+            color: 'var(--text-secondary)',
             borderRadius: '50%',
             width: '32px',
             height: '32px',
@@ -35,7 +35,7 @@ export default function ConflictModal({ conflictData, onClose }) {
             cursor: 'pointer'
           }}
         >
-          <X size={18} />
+          <X size={16} />
         </button>
 
         {/* Friendly Header */}
@@ -44,17 +44,17 @@ export default function ConflictModal({ conflictData, onClose }) {
             width: '46px',
             height: '46px',
             borderRadius: '14px',
-            background: 'rgba(245, 158, 11, 0.15)',
-            border: '1px solid rgba(245, 158, 11, 0.35)',
+            background: 'var(--color-warning-subtle)',
+            border: '1px solid rgba(217, 119, 6, 0.3)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0
           }}>
-            <CalendarClock size={24} color="#f59e0b" />
+            <CalendarClock size={24} color="var(--color-warning)" />
           </div>
           <div>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f8fafc' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>
               Schedule Overlap
             </h3>
             <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '2px' }}>
@@ -76,30 +76,30 @@ export default function ConflictModal({ conflictData, onClose }) {
         }}>
           {/* Confirmed Existing Event */}
           <div style={{
-            background: 'rgba(244, 63, 94, 0.08)',
-            border: '1px solid rgba(244, 63, 94, 0.25)',
+            background: 'var(--color-danger-subtle)',
+            border: '1px solid rgba(220, 38, 38, 0.25)',
             borderRadius: '14px',
             padding: '14px'
           }}>
-            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#fb7185', textTransform: 'uppercase', marginBottom: '6px' }}>
+            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-danger)', textTransform: 'uppercase', marginBottom: '6px' }}>
               Your Existing Pass
             </div>
-            <div style={{ fontWeight: 700, fontSize: '0.92rem', marginBottom: '8px', color: '#fff' }}>
+            <div style={{ fontWeight: 700, fontSize: '0.92rem', marginBottom: '8px', color: 'var(--text-primary)' }}>
               {conflicting_event?.event_name || 'Existing Event'}
             </div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Clock size={13} color="#fb7185" />
+              <Clock size={13} color="var(--color-danger)" />
               <span>{conflicting_event?.time || '10:00 - 12:00'}</span>
             </div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
-              <MapPin size={13} color="#fb7185" />
+              <MapPin size={13} color="var(--color-danger)" />
               <span>{conflicting_event?.venue || 'Campus Venue'}</span>
             </div>
           </div>
 
           {/* Requested Event */}
           <div style={{
-            background: 'rgba(255, 255, 255, 0.03)',
+            background: 'var(--bg-surface-elevated)',
             border: '1px solid var(--border-card)',
             borderRadius: '14px',
             padding: '14px'
@@ -107,7 +107,7 @@ export default function ConflictModal({ conflictData, onClose }) {
             <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '6px' }}>
               New Event Requested
             </div>
-            <div style={{ fontWeight: 700, fontSize: '0.92rem', marginBottom: '8px', color: '#e2e8f0' }}>
+            <div style={{ fontWeight: 700, fontSize: '0.92rem', marginBottom: '8px', color: 'var(--text-primary)' }}>
               {targetEvent?.event_name || 'Requested Event'}
             </div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -123,18 +123,18 @@ export default function ConflictModal({ conflictData, onClose }) {
 
         {/* Helpful Human Tip */}
         <div style={{
-          background: 'rgba(245, 158, 11, 0.08)',
-          border: '1px solid rgba(245, 158, 11, 0.2)',
+          background: 'var(--color-warning-subtle)',
+          border: '1px solid rgba(217, 119, 6, 0.25)',
           borderRadius: '12px',
           padding: '12px 14px',
           fontSize: '0.82rem',
-          color: '#fcd34d',
+          color: '#92400e',
           marginBottom: '20px',
           display: 'flex',
           alignItems: 'center',
           gap: '10px'
         }}>
-          <AlertCircle size={18} style={{ flexShrink: 0 }} />
+          <AlertCircle size={18} color="var(--color-warning)" style={{ flexShrink: 0 }} />
           <span>
             If you prefer attending <strong>{targetEvent?.event_name}</strong>, please cancel your existing pass from <strong>My Passes</strong> first.
           </span>

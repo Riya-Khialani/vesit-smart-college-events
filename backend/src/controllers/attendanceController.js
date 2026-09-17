@@ -20,8 +20,8 @@ async function markAttendanceByQR(req, res) {
         (r.qr_code_token === token || String(r.registration_id) === token) && r.status !== 'cancelled'
       );
       if (registration) {
-        student = db.getMockData().users.find(u => u.user_id === registration.user_id);
-        event = db.getMockData().events.find(e => e.event_id === registration.event_id);
+        student = db.getMockData().users.find(u => Number(u.user_id) === Number(registration.user_id));
+        event = db.getMockData().events.find(e => Number(e.event_id) === Number(registration.event_id));
       }
     } else {
       const numericId = isNaN(Number(token)) ? -1 : Number(token);
@@ -75,6 +75,7 @@ async function markAttendanceByQR(req, res) {
     if (db.isFallback()) {
       registration.attendance_status = 'present';
       registration.check_in_time = checkInTime;
+      if (db.saveStore) db.saveStore();
     } else {
       await db.query(
         'UPDATE registrations SET attendance_status = "present", check_in_time = NOW() WHERE registration_id = ?',
@@ -115,10 +116,11 @@ async function toggleAttendance(req, res) {
     const checkInTime = attendance_status === 'present' ? new Date() : null;
 
     if (db.isFallback()) {
-      const reg = db.getMockData().registrations.find(r => r.registration_id === Number(registration_id));
+      const reg = db.getMockData().registrations.find(r => Number(r.registration_id) === Number(registration_id));
       if (!reg) return res.status(404).json({ success: false, message: 'Registration not found.' });
       reg.attendance_status = attendance_status;
       reg.check_in_time = checkInTime;
+      if (db.saveStore) db.saveStore();
     } else {
       await db.query(
         'UPDATE registrations SET attendance_status = ?, check_in_time = ? WHERE registration_id = ?',

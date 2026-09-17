@@ -8,8 +8,8 @@ async function getAllEvents(req, res) {
     let events;
     if (db.isFallback()) {
       events = db.getMockData().events.map(ev => {
-        const confirmed = db.getMockData().registrations.filter(r => r.event_id === ev.event_id && r.status === 'confirmed').length;
-        const waitlisted = db.getMockData().registrations.filter(r => r.event_id === ev.event_id && r.status === 'waitlisted').length;
+        const confirmed = db.getMockData().registrations.filter(r => Number(r.event_id) === Number(ev.event_id) && r.status === 'confirmed').length;
+        const waitlisted = db.getMockData().registrations.filter(r => Number(r.event_id) === Number(ev.event_id) && r.status === 'waitlisted').length;
         return {
           ...ev,
           registered_count: confirmed,
@@ -67,10 +67,10 @@ async function getEventById(req, res) {
     let event;
 
     if (db.isFallback()) {
-      const ev = db.getMockData().events.find(e => e.event_id === Number(id));
+      const ev = db.getMockData().events.find(e => Number(e.event_id) === Number(id));
       if (ev) {
-        const confirmed = db.getMockData().registrations.filter(r => r.event_id === ev.event_id && r.status === 'confirmed').length;
-        const waitlisted = db.getMockData().registrations.filter(r => r.event_id === ev.event_id && r.status === 'waitlisted').length;
+        const confirmed = db.getMockData().registrations.filter(r => Number(r.event_id) === Number(ev.event_id) && r.status === 'confirmed').length;
+        const waitlisted = db.getMockData().registrations.filter(r => Number(r.event_id) === Number(ev.event_id) && r.status === 'waitlisted').length;
         event = {
           ...ev,
           registered_count: confirmed,
@@ -129,7 +129,7 @@ async function createEvent(req, res) {
     let newEvent;
 
     if (db.isFallback()) {
-      const newId = db.getMockData().events.length + 1;
+      const newId = db.getMockData().events.reduce((max, e) => Math.max(max, Number(e.event_id) || 0), 0) + 1;
       newEvent = {
         event_id: newId,
         event_name,
@@ -148,6 +148,7 @@ async function createEvent(req, res) {
         is_full: false
       };
       db.getMockData().events.push(newEvent);
+      if (db.saveStore) db.saveStore();
     } else {
       const result = await db.query(
         `INSERT INTO events (event_name, category, date, start_time, end_time, venue, capacity, description, banner_image, created_by)
@@ -217,6 +218,7 @@ async function updateEvent(req, res) {
         ...(description !== undefined && { description }),
         ...(banner_image && { banner_image })
       };
+      if (db.saveStore) db.saveStore();
     } else {
       await db.query(
         `UPDATE events SET
@@ -250,6 +252,7 @@ async function deleteEvent(req, res) {
       const initialLength = db.getMockData().events.length;
       db.getMockData().events = db.getMockData().events.filter(e => e.event_id !== Number(id));
       db.getMockData().registrations = db.getMockData().registrations.filter(r => r.event_id !== Number(id));
+      if (db.saveStore) db.saveStore();
       if (db.getMockData().events.length === initialLength) {
         return res.status(404).json({ success: false, message: 'Event not found.' });
       }
@@ -276,7 +279,7 @@ async function getRecommendedEvents(req, res) {
     let allEvents;
     if (db.isFallback()) {
       allEvents = db.getMockData().events.map(ev => {
-        const confirmed = db.getMockData().registrations.filter(r => r.event_id === ev.event_id && r.status === 'confirmed').length;
+        const confirmed = db.getMockData().registrations.filter(r => Number(r.event_id) === Number(ev.event_id) && r.status === 'confirmed').length;
         return {
           ...ev,
           registered_count: confirmed,
@@ -345,6 +348,7 @@ async function toggleFreezeEvent(req, res) {
       }
       ev.is_frozen = is_frozen !== undefined ? !!is_frozen : !ev.is_frozen;
       updatedEvent = ev;
+      if (db.saveStore) db.saveStore();
     } else {
       const rows = await db.query('SELECT * FROM events WHERE event_id = ?', [id]);
       if (rows.length === 0) {

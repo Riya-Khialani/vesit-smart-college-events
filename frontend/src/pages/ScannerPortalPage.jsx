@@ -118,11 +118,14 @@ export default function ScannerPortalPage({ onOpenAuth }) {
     }
   };
 
+  const getActiveToken = () => token || localStorage.getItem('vesit_token') || localStorage.getItem('college_token');
+
   const fetchEventRoster = async (eventId) => {
-    if (!token) return;
+    const activeToken = getActiveToken();
+    if (!activeToken) return;
     try {
       const res = await fetch(`/api/registrations/event/${eventId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': `Bearer ${activeToken}` }
       });
       const data = await res.json();
       if (data.success) {
@@ -137,7 +140,8 @@ export default function ScannerPortalPage({ onOpenAuth }) {
     const code = tokenToVerify || qrInput;
     if (!code || !code.trim()) return;
 
-    if (!token) {
+    const activeToken = getActiveToken();
+    if (!activeToken) {
       showToast('Scanner authorization required', 'error');
       return;
     }
@@ -148,7 +152,7 @@ export default function ScannerPortalPage({ onOpenAuth }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${activeToken}`
         },
         body: JSON.stringify({ qr_code_token: code.trim() })
       });
@@ -219,13 +223,14 @@ export default function ScannerPortalPage({ onOpenAuth }) {
   };
 
   const handleManualCheckIn = async (regId, studentName) => {
-    if (!token) return;
+    const activeToken = getActiveToken();
+    if (!activeToken) return;
     try {
       const res = await fetch(`/api/attendance/${regId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${activeToken}`
         },
         body: JSON.stringify({ attendance_status: 'present' })
       });
@@ -241,7 +246,7 @@ export default function ScannerPortalPage({ onOpenAuth }) {
     }
   };
 
-  const activeEvent = events.find(e => String(e.event_id) === String(selectedEventId));
+  const activeEvent = events.find(e => Number(e.event_id) === Number(selectedEventId));
   const confirmedAttendees = attendees.filter(a => a.status === 'confirmed');
   const presentAttendees = confirmedAttendees.filter(a => a.attendance_status === 'present');
   const checkedInCount = presentAttendees.length;

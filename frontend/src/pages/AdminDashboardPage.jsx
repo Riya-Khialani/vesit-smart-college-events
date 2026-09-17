@@ -85,18 +85,35 @@ export default function AdminDashboardPage({ onOpenAuth }) {
     banner_image: ''
   });
 
+  const safeISODate = (d) => {
+    if (!d) return '';
+    if (typeof d === 'string') {
+      const clean = d.split('T')[0].split(' ')[0];
+      if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) return clean;
+    }
+    try {
+      const dt = new Date(d);
+      return isNaN(dt.getTime()) ? '' : dt.toISOString().split('T')[0];
+    } catch (e) {
+      return '';
+    }
+  };
+
   useEffect(() => {
     fetchEvents();
     fetchAnalytics();
     fetchUsers();
-  }, [user]);
+  }, [user, token]);
+
+  const getActiveToken = () => token || localStorage.getItem('vesit_token') || localStorage.getItem('college_token');
 
   const fetchUsers = async () => {
-    if (!token) return;
+    const activeToken = getActiveToken();
+    if (!activeToken) return;
     try {
       setLoadingUsers(true);
       const res = await fetch('/api/auth/users', {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': `Bearer ${activeToken}` }
       });
       const data = await res.json();
       if (data.success && Array.isArray(data.users)) {
@@ -111,12 +128,17 @@ export default function AdminDashboardPage({ onOpenAuth }) {
 
   const handleUpdateRole = async (userId, newRole, userName) => {
     if (!window.confirm(`Are you sure you want to change ${userName}'s role to ${newRole.toUpperCase()}?`)) return;
+    const activeToken = getActiveToken();
+    if (!activeToken) {
+      showToast('Admin authorization required', 'error');
+      return;
+    }
     try {
       const res = await fetch(`/api/auth/users/${userId}/role`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${activeToken}`
         },
         body: JSON.stringify({ role: newRole })
       });
@@ -149,10 +171,11 @@ export default function AdminDashboardPage({ onOpenAuth }) {
   };
 
   const fetchAnalytics = async () => {
-    if (!token) return;
+    const activeToken = getActiveToken();
+    if (!activeToken) return;
     try {
       const res = await fetch('/api/analytics/dashboard', {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': `Bearer ${activeToken}` }
       });
       const data = await res.json();
       if (data.success && data.metrics) {
@@ -164,10 +187,11 @@ export default function AdminDashboardPage({ onOpenAuth }) {
   };
 
   const fetchAttendees = async (eventId) => {
-    if (!token) return;
+    const activeToken = getActiveToken();
+    if (!activeToken) return;
     try {
       const res = await fetch(`/api/registrations/event/${eventId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': `Bearer ${activeToken}` }
       });
       const data = await res.json();
       if (data.success && Array.isArray(data.registrations)) {
@@ -180,10 +204,12 @@ export default function AdminDashboardPage({ onOpenAuth }) {
 
   const handleDeleteEvent = async (id) => {
     if (!window.confirm('Are you sure you want to delete this event? This will also remove registrations.')) return;
+    const activeToken = getActiveToken();
+    if (!activeToken) return;
     try {
       const res = await fetch(`/api/events/${id}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': `Bearer ${activeToken}` }
       });
       const data = await res.json();
       if (data.success) {
@@ -197,12 +223,14 @@ export default function AdminDashboardPage({ onOpenAuth }) {
   };
 
   const handleToggleFreeze = async (eventId, currentFrozen) => {
+    const activeToken = getActiveToken();
+    if (!activeToken) return;
     try {
       const res = await fetch(`/api/events/${eventId}/freeze`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${activeToken}`
         },
         body: JSON.stringify({ is_frozen: !currentFrozen })
       });
@@ -251,13 +279,18 @@ export default function AdminDashboardPage({ onOpenAuth }) {
     const isEdit = !!editingEvent;
     const url = isEdit ? `/api/events/${editingEvent.event_id}` : '/api/events';
     const method = isEdit ? 'PUT' : 'POST';
+    const activeToken = getActiveToken();
+    if (!activeToken) {
+      showToast('Authentication token required', 'error');
+      return;
+    }
 
     try {
       const res = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${activeToken}`
         },
         body: JSON.stringify(formData)
       });
@@ -278,12 +311,14 @@ export default function AdminDashboardPage({ onOpenAuth }) {
 
   const handleToggleAttendance = async (registrationId, currentStatus) => {
     const newStatus = currentStatus === 'present' ? 'absent' : 'present';
+    const activeToken = getActiveToken();
+    if (!activeToken) return;
     try {
       const res = await fetch(`/api/attendance/${registrationId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${activeToken}`
         },
         body: JSON.stringify({ attendance_status: newStatus })
       });
@@ -514,9 +549,9 @@ export default function AdminDashboardPage({ onOpenAuth }) {
                           display: 'flex',
                           alignItems: 'center',
                           gap: '4px',
-                          background: ev.is_frozen ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)',
-                          borderColor: ev.is_frozen ? '#ef4444' : '#10b981',
-                          color: ev.is_frozen ? '#fca5a5' : '#6ee7b7'
+                          background: ev.is_frozen ? 'var(--color-danger-subtle)' : 'var(--color-success-subtle)',
+                          borderColor: ev.is_frozen ? 'var(--color-danger)' : 'var(--color-success)',
+                          color: ev.is_frozen ? 'var(--color-danger)' : 'var(--color-success)'
                         }}
                       >
                         {ev.is_frozen ? <Lock size={12} /> : <Unlock size={12} />}
@@ -528,7 +563,7 @@ export default function AdminDashboardPage({ onOpenAuth }) {
                           setFormData({
                             event_name: ev.event_name,
                             category: ev.category,
-                            date: new Date(ev.date).toISOString().split('T')[0],
+                            date: safeISODate(ev.date),
                             start_time: ev.start_time,
                             end_time: ev.end_time,
                             venue: ev.venue,
@@ -727,7 +762,7 @@ export default function AdminDashboardPage({ onOpenAuth }) {
                       );
                     })
                     .map(u => {
-                      const isCurrentUser = user && user.user_id === u.user_id;
+                      const isCurrentUser = user && Number(user.user_id) === Number(u.user_id);
                       const isUserAdmin = u.role === 'admin';
                       const isUserScanner = u.role === 'scanner';
 

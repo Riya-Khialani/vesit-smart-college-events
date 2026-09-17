@@ -92,8 +92,8 @@ function MainLayout() {
 
       {/* Production Footer */}
       <footer style={{
-        background: 'rgba(11, 15, 25, 0.95)',
-        borderTop: '1px solid var(--border-subtle)',
+        background: 'var(--bg-surface)',
+        borderTop: '1px solid var(--border-card)',
         padding: '24px 0',
         marginTop: 'auto'
       }}>
@@ -104,15 +104,15 @@ function MainLayout() {
           flexWrap: 'wrap',
           gap: '16px',
           fontSize: '0.85rem',
-          color: 'var(--text-muted)'
+          color: 'var(--text-secondary)'
         }}>
           <div>
             <strong style={{ color: 'var(--text-primary)' }}>VESIT EventHub</strong> — Advanced Cloud Computing Mini-Project
-            <div>Course: ACC Devops • Class: D17A • Batch 2, Group 11</div>
+            <div style={{ color: 'var(--text-muted)' }}>Course: ACC Devops • Class: D17A • Batch 2, Group 11</div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div><strong>Team:</strong> Prachi (39), Riya (34), Ankita (36), Shivam (41)</div>
-            <div style={{ fontSize: '0.78rem', color: '#60a5fa' }}>Docker • Kubernetes • Multi-Role Production RBAC</div>
+            <div style={{ color: 'var(--text-primary)' }}><strong>Team:</strong> Prachi (39), Riya (34), Ankita (36), Shivam (41)</div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--color-primary)', fontWeight: 600 }}>Docker • Kubernetes • Multi-Role Production RBAC</div>
           </div>
         </div>
       </footer>

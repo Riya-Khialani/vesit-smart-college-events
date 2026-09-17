@@ -69,7 +69,7 @@ export default function BookTicketModal({ event, isOpen, onClose, onSuccess, onO
       });
 
       showToast(data.message || 'Pass reserved successfully!', 'success');
-      onSuccess(data.registration);
+      if (onSuccess) onSuccess(data.registration || data);
       onClose();
     } catch (err) {
       showToast('Network error while processing registration', 'error');

@@ -243,6 +243,10 @@ const DB_STORE_PATH = path.join(__dirname, '../data/db_store.json');
 
 function saveStore() {
   try {
+    const dir = path.dirname(DB_STORE_PATH);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
     fs.writeFileSync(DB_STORE_PATH, JSON.stringify(mockData, null, 2), 'utf8');
   } catch (err) {
     console.error('[Database] Failed to persist data to disk:', err);
@@ -338,7 +342,7 @@ function handleMockQuery(sql, params) {
 
   // INSERT INTO users
   if (cleanSql.startsWith('INSERT INTO users')) {
-    const newId = mockData.users.length ? Math.max(...mockData.users.map(u => u.user_id)) + 1 : 1;
+    const newId = mockData.users.length ? Math.max(...mockData.users.map(u => Number(u.user_id) || 0)) + 1 : 1;
     const newUser = {
       user_id: newId,
       name: params[0],
@@ -350,14 +354,15 @@ function handleMockQuery(sql, params) {
       created_at: new Date()
     };
     mockData.users.push(newUser);
+    saveStore();
     return { insertId: newId, affectedRows: 1 };
   }
 
   // SELECT events with registration counts
   if (cleanSql.includes('FROM events') && (cleanSql.includes('COUNT') || cleanSql.includes('LEFT JOIN'))) {
     return mockData.events.map(ev => {
-      const regCount = mockData.registrations.filter(r => r.event_id === ev.event_id && r.status === 'confirmed').length;
-      const waitCount = mockData.registrations.filter(r => r.event_id === ev.event_id && r.status === 'waitlisted').length;
+      const regCount = mockData.registrations.filter(r => Number(r.event_id) === Number(ev.event_id) && r.status === 'confirmed').length;
+      const waitCount = mockData.registrations.filter(r => Number(r.event_id) === Number(ev.event_id) && r.status === 'waitlisted').length;
       return {
         ...ev,
         registered_count: regCount,
@@ -368,16 +373,16 @@ function handleMockQuery(sql, params) {
 
   // SELECT single event
   if (cleanSql.includes('SELECT * FROM events WHERE event_id = ?')) {
-    const ev = mockData.events.find(e => e.event_id === Number(params[0]));
+    const ev = mockData.events.find(e => Number(e.event_id) === Number(params[0]));
     if (!ev) return [];
-    const regCount = mockData.registrations.filter(r => r.event_id === ev.event_id && r.status === 'confirmed').length;
-    const waitCount = mockData.registrations.filter(r => r.event_id === ev.event_id && r.status === 'waitlisted').length;
+    const regCount = mockData.registrations.filter(r => Number(r.event_id) === Number(ev.event_id) && r.status === 'confirmed').length;
+    const waitCount = mockData.registrations.filter(r => Number(r.event_id) === Number(ev.event_id) && r.status === 'waitlisted').length;
     return [{ ...ev, registered_count: regCount, waitlist_count: waitCount }];
   }
 
   // INSERT INTO events
   if (cleanSql.startsWith('INSERT INTO events')) {
-    const newId = mockData.events.length ? Math.max(...mockData.events.map(e => e.event_id)) + 1 : 1;
+    const newId = mockData.events.length ? Math.max(...mockData.events.map(e => Number(e.event_id) || 0)) + 1 : 1;
     const newEvent = {
       event_id: newId,
       event_name: params[0],
@@ -392,13 +397,14 @@ function handleMockQuery(sql, params) {
       created_by: params[9] || 1
     };
     mockData.events.push(newEvent);
+    saveStore();
     return { insertId: newId, affectedRows: 1 };
   }
 
   // UPDATE events
   if (cleanSql.startsWith('UPDATE events')) {
     const eventId = Number(params[params.length - 1]);
-    const evIndex = mockData.events.findIndex(e => e.event_id === eventId);
+    const evIndex = mockData.events.findIndex(e => Number(e.event_id) === eventId);
     if (evIndex !== -1) {
       mockData.events[evIndex] = {
         ...mockData.events[evIndex],
@@ -412,6 +418,7 @@ function handleMockQuery(sql, params) {
         description: params[7],
         banner_image: params[8]
       };
+      saveStore();
       return { affectedRows: 1 };
     }
     return { affectedRows: 0 };
@@ -420,8 +427,9 @@ function handleMockQuery(sql, params) {
   // DELETE events
   if (cleanSql.startsWith('DELETE FROM events')) {
     const eventId = Number(params[0]);
-    mockData.events = mockData.events.filter(e => e.event_id !== eventId);
-    mockData.registrations = mockData.registrations.filter(r => r.event_id !== eventId);
+    mockData.events = mockData.events.filter(e => Number(e.event_id) !== eventId);
+    mockData.registrations = mockData.registrations.filter(r => Number(r.event_id) !== eventId);
+    saveStore();
     return { affectedRows: 1 };
   }
 
@@ -429,9 +437,9 @@ function handleMockQuery(sql, params) {
   if (cleanSql.includes('FROM registrations') && cleanSql.includes('WHERE r.user_id = ?')) {
     const userId = Number(params[0]);
     const userRegs = mockData.registrations
-      .filter(r => r.user_id === userId && r.status !== 'cancelled')
+      .filter(r => Number(r.user_id) === userId && r.status !== 'cancelled')
       .map(r => {
-        const ev = mockData.events.find(e => e.event_id === r.event_id) || {};
+        const ev = mockData.events.find(e => Number(e.event_id) === Number(r.event_id)) || {};
         return {
           registration_id: r.registration_id,
           user_id: r.user_id,

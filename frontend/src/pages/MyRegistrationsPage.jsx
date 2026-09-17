@@ -9,8 +9,25 @@ export default function MyRegistrationsPage({ onOpenAuth }) {
   const [loading, setLoading] = useState(true);
   const [activeQR, setActiveQR] = useState(null);
 
+  const formatEventDate = (dateVal) => {
+    if (!dateVal) return '';
+    try {
+      const str = String(dateVal).trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+        const [y, m, d] = str.split('-').map(Number);
+        const dt = new Date(y, m - 1, d);
+        return dt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      }
+      const dt = new Date(str.replace(' ', 'T'));
+      return isNaN(dt.getTime()) ? str : dt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    } catch (e) {
+      return String(dateVal);
+    }
+  };
+
   useEffect(() => {
-    if (isLoggedIn && token) {
+    const activeToken = token || localStorage.getItem('vesit_token') || localStorage.getItem('college_token');
+    if (isLoggedIn || activeToken) {
       fetchRegistrations();
     } else {
       setLoading(false);
@@ -46,9 +63,10 @@ export default function MyRegistrationsPage({ onOpenAuth }) {
     }
 
     try {
+      const activeToken = token || localStorage.getItem('vesit_token') || localStorage.getItem('college_token');
       const res = await fetch(`/api/registrations/${reg.registration_id}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': `Bearer ${activeToken}` }
       });
       const data = await res.json();
 
@@ -164,7 +182,7 @@ export default function MyRegistrationsPage({ onOpenAuth }) {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '14px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <Calendar size={14} color="var(--color-primary)" />
-                            <span>{new Date(reg.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+                            <span>{formatEventDate(reg.date)}</span>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <Clock size={14} color="var(--text-muted)" />

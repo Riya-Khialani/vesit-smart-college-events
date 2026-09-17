@@ -30,6 +30,17 @@ export default function QRModal({ registration, onClose }) {
   const isPresent = registration.attendance_status === 'present';
   const isWaitlist = registration.status === 'waitlisted';
 
+  const formatCheckInTime = (timeVal) => {
+    if (!timeVal) return '';
+    try {
+      const str = String(timeVal).trim().replace(' ', 'T');
+      const dt = new Date(str);
+      return isNaN(dt.getTime()) ? '' : dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch (e) {
+      return '';
+    }
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -190,7 +201,7 @@ export default function QRModal({ registration, onClose }) {
             <div style={{ marginBottom: '12px' }}>
               {isPresent ? (
                 <span className="badge badge-success" style={{ padding: '5px 12px', fontSize: '0.8rem' }}>
-                  <CheckCircle2 size={14} /> Admitted at Gate ({new Date(registration.check_in_time || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})
+                  <CheckCircle2 size={14} /> Admitted at Gate {registration.check_in_time ? `(${formatCheckInTime(registration.check_in_time)})` : ''}
                 </span>
               ) : isWaitlist ? (
                 <span className="badge badge-warning" style={{ padding: '5px 12px', fontSize: '0.8rem' }}>

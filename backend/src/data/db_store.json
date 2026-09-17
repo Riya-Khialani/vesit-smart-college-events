@@ -59,16 +59,6 @@
       "department": "Gate Operations / Desk 1",
       "interests": "Attendance Verification, Security",
       "created_at": "2026-09-06T00:00:00.000Z"
-    },
-    {
-      "user_id": 7,
-      "name": "Duplicate Test",
-      "email": "duplicate.test@vesit.edu",
-      "password": "$2a$10$hcjXJryeVIpwjXUJ5wCs.eQ6wR/tYgQ7RKxxlBxqEX.WWrlKwjZPS",
-      "role": "student",
-      "department": "CMPN",
-      "interests": "Engineering, Technology",
-      "created_at": "2026-09-17T18:46:42.204Z"
     }
   ],
   "events": [
@@ -237,6 +227,17 @@
       "attendance_status": "absent",
       "check_in_time": null,
       "registration_date": "2026-09-14 10:15:00"
+    },
+    {
+      "registration_id": 10,
+      "user_id": 8,
+      "event_id": 1,
+      "status": "confirmed",
+      "waitlist_position": 0,
+      "qr_code_token": "QR-EVT1-USR8-62407",
+      "attendance_status": "present",
+      "check_in_time": "2026-09-17T19:04:31.820Z",
+      "registration_date": "2026-09-17T19:04:31.752Z"
     }
   ]
 }

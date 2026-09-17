@@ -29,7 +29,7 @@ async function getAdminAnalytics(req, res) {
 
     // Per Event Breakdown
     const eventBreakdown = events.map(ev => {
-      const eventRegs = registrations.filter(r => r.event_id === ev.event_id);
+      const eventRegs = registrations.filter(r => Number(r.event_id) === Number(ev.event_id));
       const confirmed = eventRegs.filter(r => r.status === 'confirmed').length;
       const waitlisted = eventRegs.filter(r => r.status === 'waitlisted').length;
       const present = eventRegs.filter(r => r.attendance_status === 'present').length;
@@ -44,7 +44,7 @@ async function getAdminAnalytics(req, res) {
         waitlisted,
         present,
         attendance_rate: attendancePct,
-        fill_rate: Math.round((confirmed / ev.capacity) * 100)
+        fill_rate: Number(ev.capacity) > 0 ? Math.round((confirmed / Number(ev.capacity)) * 100) : 0
       };
     });
 
@@ -55,7 +55,7 @@ async function getAdminAnalytics(req, res) {
     // Department Breakdown
     const deptMap = {};
     registrations.forEach(r => {
-      const u = users.find(usr => usr.user_id === r.user_id);
+      const u = users.find(usr => Number(usr.user_id) === Number(r.user_id));
       const dept = u ? u.department : 'Other';
       deptMap[dept] = (deptMap[dept] || 0) + 1;
     });

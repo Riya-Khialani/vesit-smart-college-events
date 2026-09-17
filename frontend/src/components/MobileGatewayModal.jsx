@@ -7,8 +7,10 @@ export default function MobileGatewayModal({ isOpen, onClose }) {
   const canvasRef = useRef(null);
   const { showToast } = useAuth();
 
-  // Host PC IP Address on local Wi-Fi
-  const mobileUrl = 'http://192.168.1.34:5000';
+  // Dynamic mobile entry point: uses deployed Render origin or local Wi-Fi IP
+  const mobileUrl = typeof window !== 'undefined' && !window.location.origin.includes('localhost') && !window.location.origin.includes('127.0.0.1')
+    ? window.location.origin
+    : 'http://192.168.1.34:5000';
 
   useEffect(() => {
     if (isOpen && canvasRef.current) {

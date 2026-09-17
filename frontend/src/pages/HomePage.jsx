@@ -75,7 +75,8 @@ export default function HomePage({ onViewRegistrations, onNavigateToAdmin, onOpe
   };
 
   const handleRegister = async (event) => {
-    if (!token) {
+    const activeToken = token || localStorage.getItem('vesit_token') || localStorage.getItem('college_token');
+    if (!activeToken) {
       onOpenAuth();
       showToast('Please sign in or register to book your pass', 'info');
       return;
@@ -85,7 +86,7 @@ export default function HomePage({ onViewRegistrations, onNavigateToAdmin, onOpe
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${activeToken}`
         },
         body: JSON.stringify({ event_id: event.event_id })
       });
@@ -243,7 +244,14 @@ export default function HomePage({ onViewRegistrations, onNavigateToAdmin, onOpe
                   isRegistered={reg?.status === 'confirmed'}
                   isWaitlisted={reg?.status === 'waitlisted'}
                   waitlistPos={reg?.waitlist_position}
-                  onRegister={handleRegister}
+                  onRegister={() => {
+                    if (!isLoggedIn) {
+                      onOpenAuth();
+                      showToast('Please sign in or register to book your pass', 'info');
+                    } else {
+                      setSelectedEventForBooking(event);
+                    }
+                  }}
                   onViewDetails={() => onViewRegistrations()}
                   onManage={() => onNavigateToAdmin && onNavigateToAdmin(event)}
                 />

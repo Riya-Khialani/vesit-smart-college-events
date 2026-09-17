@@ -69,7 +69,7 @@ async function registerForEvent(req, res) {
     let existingUserReg;
     if (db.isFallback()) {
       existingUserReg = db.getMockData().registrations.find(
-        r => r.user_id === userId && r.event_id === Number(event_id) && r.status !== 'cancelled'
+        r => Number(r.user_id) === Number(userId) && Number(r.event_id) === Number(event_id) && r.status !== 'cancelled'
       );
     } else {
       const rows = await db.query(
@@ -92,9 +92,9 @@ async function registerForEvent(req, res) {
     let userExistingRegistrations = [];
     if (db.isFallback()) {
       userExistingRegistrations = db.getMockData().registrations
-        .filter(r => r.user_id === userId && r.status === 'confirmed')
+        .filter(r => Number(r.user_id) === Number(userId) && r.status === 'confirmed')
         .map(r => {
-          const ev = db.getMockData().events.find(e => e.event_id === r.event_id);
+          const ev = db.getMockData().events.find(e => Number(e.event_id) === Number(r.event_id));
           return { ...r, ...ev };
         });
     } else {
@@ -134,8 +134,8 @@ async function registerForEvent(req, res) {
     let waitlistCount = 0;
 
     if (db.isFallback()) {
-      confirmedCount = db.getMockData().registrations.filter(r => r.event_id === Number(event_id) && r.status === 'confirmed').length;
-      waitlistCount = db.getMockData().registrations.filter(r => r.event_id === Number(event_id) && r.status === 'waitlisted').length;
+      confirmedCount = db.getMockData().registrations.filter(r => Number(r.event_id) === Number(event_id) && r.status === 'confirmed').length;
+      waitlistCount = db.getMockData().registrations.filter(r => Number(r.event_id) === Number(event_id) && r.status === 'waitlisted').length;
     } else {
       const countRows = await db.query(`
         SELECT 
@@ -152,11 +152,12 @@ async function registerForEvent(req, res) {
 
     if (confirmedCount < targetEvent.capacity) {
       // Direct confirmed seat
+      let newReg;
       if (db.isFallback()) {
-        const newRegId = db.getMockData().registrations.length + 1;
-        const newReg = {
+        const newRegId = db.getMockData().registrations.reduce((max, r) => Math.max(max, Number(r.registration_id) || 0), 0) + 1;
+        newReg = {
           registration_id: newRegId,
-          user_id: userId,
+          user_id: Number(userId),
           event_id: Number(event_id),
           status: 'confirmed',
           waitlist_position: 0,
@@ -168,10 +169,20 @@ async function registerForEvent(req, res) {
         db.getMockData().registrations.push(newReg);
         if (db.saveStore) db.saveStore();
       } else {
-        await db.query(`
+        const result = await db.query(`
           INSERT INTO registrations (user_id, event_id, status, waitlist_position, qr_code_token, attendance_status)
           VALUES (?, ?, 'confirmed', 0, ?, 'absent')
         `, [userId, event_id, qrToken]);
+        newReg = {
+          registration_id: result.insertId,
+          user_id: Number(userId),
+          event_id: Number(event_id),
+          status: 'confirmed',
+          waitlist_position: 0,
+          qr_code_token: qrToken,
+          attendance_status: 'absent',
+          check_in_time: null
+        };
       }
 
       return res.status(201).json({
@@ -179,17 +190,19 @@ async function registerForEvent(req, res) {
         status: 'confirmed',
         message: '🎉 Registration successful! Your digital QR ticket is ready.',
         qr_code_token: qrToken,
-        event_name: targetEvent.event_name
+        event_name: targetEvent.event_name,
+        registration: newReg
       });
     } else {
       // Event is full -> Allocate to Waitlist Queue
       const waitlistPos = waitlistCount + 1;
+      let newReg;
 
       if (db.isFallback()) {
-        const newRegId = db.getMockData().registrations.length + 1;
-        const newReg = {
+        const newRegId = db.getMockData().registrations.reduce((max, r) => Math.max(max, Number(r.registration_id) || 0), 0) + 1;
+        newReg = {
           registration_id: newRegId,
-          user_id: userId,
+          user_id: Number(userId),
           event_id: Number(event_id),
           status: 'waitlisted',
           waitlist_position: waitlistPos,
@@ -201,10 +214,20 @@ async function registerForEvent(req, res) {
         db.getMockData().registrations.push(newReg);
         if (db.saveStore) db.saveStore();
       } else {
-        await db.query(`
+        const result = await db.query(`
           INSERT INTO registrations (user_id, event_id, status, waitlist_position, qr_code_token, attendance_status)
           VALUES (?, ?, 'waitlisted', ?, ?, 'absent')
         `, [userId, event_id, waitlistPos, qrToken]);
+        newReg = {
+          registration_id: result.insertId,
+          user_id: Number(userId),
+          event_id: Number(event_id),
+          status: 'waitlisted',
+          waitlist_position: waitlistPos,
+          qr_code_token: qrToken,
+          attendance_status: 'absent',
+          check_in_time: null
+        };
       }
 
       return res.status(200).json({
@@ -213,7 +236,8 @@ async function registerForEvent(req, res) {
         waitlist_position: waitlistPos,
         message: `⏳ Event Full! You have been added to the waitlist at Position #${waitlistPos}. You will be automatically enrolled if a seat opens.`,
         qr_code_token: qrToken,
-        event_name: targetEvent.event_name
+        event_name: targetEvent.event_name,
+        registration: newReg
       });
     }
   } catch (error) {
@@ -231,7 +255,7 @@ async function cancelRegistration(req, res) {
     let regToCancel;
     if (db.isFallback()) {
       regToCancel = db.getMockData().registrations.find(
-        r => r.registration_id === Number(registration_id) && (r.user_id === userId || req.user.role === 'admin')
+        r => Number(r.registration_id) === Number(registration_id) && (Number(r.user_id) === Number(userId) || req.user.role === 'admin')
       );
     } else {
       const rows = await db.query(
@@ -246,7 +270,7 @@ async function cancelRegistration(req, res) {
     }
 
     const wasConfirmed = regToCancel.status === 'confirmed';
-    const eventId = regToCancel.event_id;
+    const eventId = Number(regToCancel.event_id);
 
     // Mark current registration as cancelled
     if (db.isFallback()) {
@@ -262,14 +286,14 @@ async function cancelRegistration(req, res) {
     if (wasConfirmed) {
       if (db.isFallback()) {
         const waitlistedStudents = db.getMockData().registrations
-          .filter(r => r.event_id === eventId && r.status === 'waitlisted')
+          .filter(r => Number(r.event_id) === eventId && r.status === 'waitlisted')
           .sort((a, b) => a.waitlist_position - b.waitlist_position);
 
         if (waitlistedStudents.length > 0) {
           const firstInLine = waitlistedStudents[0];
           firstInLine.status = 'confirmed';
           firstInLine.waitlist_position = 0;
-          const user = db.getMockData().users.find(u => u.user_id === firstInLine.user_id);
+          const user = db.getMockData().users.find(u => Number(u.user_id) === Number(firstInLine.user_id));
           promotedStudent = user ? user.name : `Student #${firstInLine.user_id}`;
 
           // Shift other waitlist positions down by 1
@@ -317,9 +341,9 @@ async function getMyRegistrations(req, res) {
 
     if (db.isFallback()) {
       registrations = db.getMockData().registrations
-        .filter(r => r.user_id === userId && r.status !== 'cancelled')
+        .filter(r => Number(r.user_id) === Number(userId) && r.status !== 'cancelled')
         .map(r => {
-          const ev = db.getMockData().events.find(e => e.event_id === r.event_id) || {};
+          const ev = db.getMockData().events.find(e => Number(e.event_id) === Number(r.event_id)) || {};
           return {
             ...r,
             event_name: ev.event_name,
@@ -370,9 +394,9 @@ async function getEventRegistrations(req, res) {
 
     if (db.isFallback()) {
       registrations = db.getMockData().registrations
-        .filter(r => r.event_id === Number(event_id) && r.status !== 'cancelled')
+        .filter(r => Number(r.event_id) === Number(event_id) && r.status !== 'cancelled')
         .map(r => {
-          const u = db.getMockData().users.find(usr => usr.user_id === r.user_id) || {};
+          const u = db.getMockData().users.find(usr => Number(usr.user_id) === Number(r.user_id)) || {};
           return {
             ...r,
             student_name: u.name,

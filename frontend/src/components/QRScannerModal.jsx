@@ -19,11 +19,12 @@ export default function QRScannerModal({ onClose, onScanSuccess }) {
     setResult(null);
 
     try {
+      const activeToken = token || localStorage.getItem('vesit_token') || localStorage.getItem('college_token');
       const res = await fetch('/api/attendance/scan', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${activeToken}`
         },
         body: JSON.stringify({ qr_code_token: code.trim() })
       });
@@ -61,9 +62,9 @@ export default function QRScannerModal({ onClose, onScanSuccess }) {
             position: 'absolute',
             top: '18px',
             right: '18px',
-            background: 'rgba(255, 255, 255, 0.08)',
-            border: 'none',
-            color: '#fff',
+            background: 'var(--bg-surface-elevated)',
+            border: '1px solid var(--border-subtle)',
+            color: 'var(--text-secondary)',
             borderRadius: '50%',
             width: '32px',
             height: '32px',
@@ -73,7 +74,7 @@ export default function QRScannerModal({ onClose, onScanSuccess }) {
             cursor: 'pointer'
           }}
         >
-          <X size={18} />
+          <X size={16} />
         </button>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
@@ -81,15 +82,16 @@ export default function QRScannerModal({ onClose, onScanSuccess }) {
             width: '40px',
             height: '40px',
             borderRadius: '12px',
-            background: 'linear-gradient(135deg, #3b82f6, #06b6d4)',
+            background: 'var(--color-primary-subtle)',
+            border: '1px solid var(--color-primary-border)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
           }}>
-            <Scan size={20} color="#fff" />
+            <Scan size={20} color="var(--color-primary)" />
           </div>
           <div>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Venue Gate QR Scanner</h3>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>Venue Gate QR Scanner</h3>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
               Scan attendee QR passes or enter ticket ID for gate check-in
             </p>
@@ -98,14 +100,14 @@ export default function QRScannerModal({ onClose, onScanSuccess }) {
 
         {/* Viewfinder Target */}
         <div style={{
-          border: '2px dashed rgba(59, 130, 246, 0.3)',
+          border: '2px dashed var(--border-card)',
           borderRadius: '16px',
           padding: '28px 20px',
           textAlign: 'center',
           marginBottom: '20px',
-          background: 'rgba(59, 130, 246, 0.03)'
+          background: 'var(--bg-surface-elevated)'
         }}>
-          <QrCode size={48} color="#60a5fa" style={{ margin: '0 auto 12px', display: 'block', opacity: 0.8 }} />
+          <QrCode size={48} color="var(--color-primary)" style={{ margin: '0 auto 12px', display: 'block', opacity: 0.8 }} />
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
             Point handheld barcode reader or enter QR ticket code below
           </p>
@@ -136,8 +138,8 @@ export default function QRScannerModal({ onClose, onScanSuccess }) {
         {/* Scan Result */}
         {result && (
           <div style={{
-            background: 'rgba(16, 185, 129, 0.1)',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
+            background: 'var(--color-success-subtle)',
+            border: '1px solid rgba(5, 150, 105, 0.3)',
             borderRadius: '14px',
             padding: '16px',
             marginBottom: '16px',
@@ -145,16 +147,16 @@ export default function QRScannerModal({ onClose, onScanSuccess }) {
             alignItems: 'flex-start',
             gap: '12px'
           }}>
-            <CheckCircle2 size={24} color="#34d399" style={{ flexShrink: 0, marginTop: '2px' }} />
+            <CheckCircle2 size={24} color="var(--color-success)" style={{ flexShrink: 0, marginTop: '2px' }} />
             <div>
-              <div style={{ fontWeight: 700, color: '#34d399', fontSize: '0.95rem' }}>
+              <div style={{ fontWeight: 700, color: 'var(--color-success)', fontSize: '0.95rem' }}>
                 {result.message}
               </div>
               {result.attendee && (
-                <div style={{ fontSize: '0.82rem', color: '#e2e8f0', marginTop: '6px' }}>
-                  <strong>Attendee:</strong> {result.attendee.name} ({result.attendee.department})<br />
-                  <strong>Event:</strong> {result.attendee.event_name}<br />
-                  <strong>Checked in at:</strong> {new Date(result.attendee.check_in_time).toLocaleTimeString()}
+                <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '6px', lineHeight: 1.5 }}>
+                  <strong style={{ color: 'var(--text-primary)' }}>Attendee:</strong> {result.attendee.name} ({result.attendee.department})<br />
+                  <strong style={{ color: 'var(--text-primary)' }}>Event:</strong> {result.attendee.event_name}<br />
+                  <strong style={{ color: 'var(--text-primary)' }}>Checked in at:</strong> {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
               )}
             </div>
@@ -164,8 +166,8 @@ export default function QRScannerModal({ onClose, onScanSuccess }) {
         {/* Error / Alert */}
         {error && (
           <div style={{
-            background: 'rgba(244, 63, 94, 0.1)',
-            border: '1px solid rgba(244, 63, 94, 0.3)',
+            background: 'var(--color-danger-subtle)',
+            border: '1px solid rgba(220, 38, 38, 0.3)',
             borderRadius: '14px',
             padding: '16px',
             marginBottom: '16px',
@@ -173,8 +175,8 @@ export default function QRScannerModal({ onClose, onScanSuccess }) {
             alignItems: 'flex-start',
             gap: '12px'
           }}>
-            <AlertCircle size={24} color="#fb7185" style={{ flexShrink: 0, marginTop: '2px' }} />
-            <div style={{ color: '#fda4af', fontSize: '0.88rem', fontWeight: 600 }}>
+            <AlertCircle size={24} color="var(--color-danger)" style={{ flexShrink: 0, marginTop: '2px' }} />
+            <div style={{ color: 'var(--color-danger)', fontSize: '0.88rem', fontWeight: 600 }}>
               {error}
             </div>
           </div>

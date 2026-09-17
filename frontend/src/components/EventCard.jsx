@@ -24,6 +24,22 @@ export default function EventCard({
 
   const badgeClass = categoryBadges[event.category] || 'badge-workshop';
 
+  const formatEventDate = (dateVal) => {
+    if (!dateVal) return '';
+    try {
+      const str = String(dateVal).trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+        const [y, m, d] = str.split('-').map(Number);
+        const dt = new Date(y, m - 1, d);
+        return dt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+      }
+      const dt = new Date(str.replace(' ', 'T'));
+      return isNaN(dt.getTime()) ? str : dt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+    } catch (e) {
+      return String(dateVal);
+    }
+  };
+
   return (
     <div 
       className="glass-panel" 
@@ -136,7 +152,7 @@ export default function EventCard({
           <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
             <Calendar size={14} color="var(--color-primary)" />
             <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
-              {new Date(event.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+              {formatEventDate(event.date)}
             </span>
           </div>
 
