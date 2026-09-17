@@ -55,7 +55,6 @@ export default function HomePage({ onViewRegistrations, onNavigateToAdmin, onOpe
   };
 
   const fetchUserRegistrations = async () => {
-    const token = localStorage.getItem('college_token');
     if (!token) return;
     try {
       const res = await fetch('/api/registrations/my', {
@@ -71,7 +70,11 @@ export default function HomePage({ onViewRegistrations, onNavigateToAdmin, onOpe
   };
 
   const handleRegister = async (event) => {
-    const token = localStorage.getItem('college_token');
+    if (!token) {
+      onOpenAuth();
+      showToast('Please sign in or register to book your pass', 'info');
+      return;
+    }
     try {
       const res = await fetch('/api/registrations', {
         method: 'POST',

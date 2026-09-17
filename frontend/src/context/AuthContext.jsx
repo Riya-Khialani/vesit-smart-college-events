@@ -124,6 +124,8 @@ export function AuthProvider({ children }) {
     setToken(null);
     localStorage.removeItem('vesit_user');
     localStorage.removeItem('vesit_token');
+    localStorage.removeItem('college_token');
+    localStorage.removeItem('college_user');
     showToast('You have been logged out successfully', 'info');
   };
 
