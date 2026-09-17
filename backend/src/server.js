@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const compression = require('compression');
 require('dotenv').config();
 
 const db = require('./config/database');
@@ -11,6 +12,9 @@ const analyticsRoutes = require('./routes/analyticsRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Enable HTTP Gzip compression for 70%+ reduced network payloads on mobile
+app.use(compression());
 
 // Enable CORS and JSON body parser
 app.use(cors({
@@ -52,7 +56,11 @@ const fs = require('fs');
 const frontendDist = path.resolve(__dirname, '../../frontend/dist');
 
 if (fs.existsSync(frontendDist)) {
-  app.use(express.static(frontendDist));
+  app.use(express.static(frontendDist, {
+    maxAge: '1d',
+    etag: true,
+    lastModified: true
+  }));
   app.get('*', (req, res, next) => {
     if (req.originalUrl.startsWith('/api') || req.originalUrl.startsWith('/health')) {
       return next();
