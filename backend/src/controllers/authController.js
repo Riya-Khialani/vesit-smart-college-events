@@ -12,11 +12,13 @@ async function login(req, res) {
       return res.status(400).json({ success: false, message: 'Please provide email and password.' });
     }
 
+    const cleanEmail = email.trim().toLowerCase();
+
     let users;
     if (db.isFallback()) {
-      users = db.getMockData().users.filter(u => u.email.toLowerCase() === email.toLowerCase());
+      users = db.getMockData().users.filter(u => u.email.trim().toLowerCase() === cleanEmail);
     } else {
-      users = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+      users = await db.query('SELECT * FROM users WHERE LOWER(TRIM(email)) = ?', [cleanEmail]);
     }
 
     if (!users || users.length === 0) {
@@ -73,6 +75,9 @@ async function register(req, res) {
       return res.status(400).json({ success: false, message: 'Name, email, and password are required.' });
     }
 
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanName = name.trim();
+
     // Security lockdown: Public registration can NEVER create scanner or admin accounts.
     // Scanner and Admin privileges must be assigned by college administration.
     const assignedRole = 'student';
@@ -80,14 +85,14 @@ async function register(req, res) {
     // Check if user already exists
     let existing;
     if (db.isFallback()) {
-      existing = db.getMockData().users.find(u => u.email.toLowerCase() === email.toLowerCase());
+      existing = db.getMockData().users.find(u => u.email.trim().toLowerCase() === cleanEmail);
     } else {
-      const rows = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+      const rows = await db.query('SELECT * FROM users WHERE LOWER(TRIM(email)) = ?', [cleanEmail]);
       existing = rows[0];
     }
 
     if (existing) {
-      return res.status(409).json({ success: false, message: 'An account with this email already exists.' });
+      return res.status(409).json({ success: false, message: 'An account with this email already exists. Please sign in instead.' });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -95,11 +100,11 @@ async function register(req, res) {
 
     let newUser;
     if (db.isFallback()) {
-      const newId = db.getMockData().users.length + 1;
+      const newId = db.getMockData().users.length ? Math.max(...db.getMockData().users.map(u => u.user_id)) + 1 : 1;
       newUser = {
         user_id: newId,
-        name,
-        email,
+        name: cleanName,
+        email: cleanEmail,
         password: hashedPassword,
         role: assignedRole,
         department,
@@ -107,16 +112,17 @@ async function register(req, res) {
         created_at: new Date()
       };
       db.getMockData().users.push(newUser);
+      if (db.saveStore) db.saveStore();
     } else {
       const result = await db.query(
         'INSERT INTO users (name, email, password, role, department, interests) VALUES (?, ?, ?, ?, ?, ?)',
-        [name, email, hashedPassword, assignedRole, department, interests]
+        [cleanName, cleanEmail, hashedPassword, assignedRole, department, interests]
       );
       newUser = {
         user_id: result.insertId,
-        name,
-        email,
-        role,
+        name: cleanName,
+        email: cleanEmail,
+        role: assignedRole,
         department,
         interests
       };

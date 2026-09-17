@@ -1,0 +1,242 @@
+{
+  "users": [
+    {
+      "user_id": 1,
+      "name": "Admin Incharge",
+      "email": "admin@vesit.edu",
+      "password": "$2a$10$7Hm4q//0u1hED11WNjeW1ODwUcJa9dadfDiEky.839pzIuA6.1edO",
+      "role": "admin",
+      "department": "Faculty IT",
+      "interests": "Cloud, AI, DevOps",
+      "created_at": "2026-09-01T00:00:00.000Z"
+    },
+    {
+      "user_id": 2,
+      "name": "Riya Khialani",
+      "email": "riya@vesit.edu",
+      "password": "$2a$10$wHBkNfu3exLAeudRDZjs/uVsCIrj/WFa0lvg4vnTJIW.ARPdMuuCm",
+      "role": "student",
+      "department": "CMPN",
+      "interests": "AI, Machine Learning, Cloud",
+      "created_at": "2026-09-02T00:00:00.000Z"
+    },
+    {
+      "user_id": 3,
+      "name": "Prachi Lund",
+      "email": "prachi@vesit.edu",
+      "password": "$2a$10$wHBkNfu3exLAeudRDZjs/uVsCIrj/WFa0lvg4vnTJIW.ARPdMuuCm",
+      "role": "student",
+      "department": "IT",
+      "interests": "Web Development, UI/UX",
+      "created_at": "2026-09-03T00:00:00.000Z"
+    },
+    {
+      "user_id": 4,
+      "name": "Ankita Kukreja",
+      "email": "ankita@vesit.edu",
+      "password": "$2a$10$wHBkNfu3exLAeudRDZjs/uVsCIrj/WFa0lvg4vnTJIW.ARPdMuuCm",
+      "role": "student",
+      "department": "EXTC",
+      "interests": "IoT, Robotics, AI",
+      "created_at": "2026-09-04T00:00:00.000Z"
+    },
+    {
+      "user_id": 5,
+      "name": "Shivam Makhija",
+      "email": "shivam@vesit.edu",
+      "password": "$2a$10$wHBkNfu3exLAeudRDZjs/uVsCIrj/WFa0lvg4vnTJIW.ARPdMuuCm",
+      "role": "student",
+      "department": "CMPN",
+      "interests": "DevOps, Cybersecurity, Cloud",
+      "created_at": "2026-09-05T00:00:00.000Z"
+    },
+    {
+      "user_id": 6,
+      "name": "Gate Scanner Volunteer",
+      "email": "scanner@vesit.edu",
+      "password": "$2a$10$tEksPr0q5EsErxePhCHue.Fs.R/8QGAbhCegfwKvaqiygR6Nsc4Hq",
+      "role": "scanner",
+      "department": "Gate Operations / Desk 1",
+      "interests": "Attendance Verification, Security",
+      "created_at": "2026-09-06T00:00:00.000Z"
+    },
+    {
+      "user_id": 7,
+      "name": "Duplicate Test",
+      "email": "duplicate.test@vesit.edu",
+      "password": "$2a$10$hcjXJryeVIpwjXUJ5wCs.eQ6wR/tYgQ7RKxxlBxqEX.WWrlKwjZPS",
+      "role": "student",
+      "department": "CMPN",
+      "interests": "Engineering, Technology",
+      "created_at": "2026-09-17T18:46:42.204Z"
+    }
+  ],
+  "events": [
+    {
+      "event_id": 1,
+      "event_name": "AI & Machine Learning Workshop",
+      "category": "Workshop",
+      "date": "2026-09-25",
+      "start_time": "10:00:00",
+      "end_time": "12:00:00",
+      "venue": "Auditorium Hall A",
+      "capacity": 50,
+      "description": "Hands-on practical session on deep learning models, neural networks, and generative AI using Python and TensorFlow.",
+      "banner_image": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=800&q=80",
+      "created_by": 1
+    },
+    {
+      "event_id": 2,
+      "event_name": "Cybersecurity & Ethical Hacking",
+      "category": "Workshop",
+      "date": "2026-09-25",
+      "start_time": "11:00:00",
+      "end_time": "13:00:00",
+      "venue": "Lab 402, 4th Floor",
+      "capacity": 40,
+      "description": "Explore network security auditing, penetration testing methodologies, and defensive cyber strategies.",
+      "banner_image": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80",
+      "created_by": 1
+    },
+    {
+      "event_id": 3,
+      "event_name": "Modern Web Architecture Bootcamp",
+      "category": "Bootcamp",
+      "date": "2026-09-25",
+      "start_time": "14:00:00",
+      "end_time": "16:00:00",
+      "venue": "Seminar Hall B",
+      "capacity": 60,
+      "description": "Master React 18, Node microservices, state management, and modern component-driven UI architecture.",
+      "banner_image": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80",
+      "created_by": 1
+    },
+    {
+      "event_id": 4,
+      "event_name": "Cloud Native DevOps Hackathon",
+      "category": "Hackathon",
+      "date": "2026-09-26",
+      "start_time": "09:00:00",
+      "end_time": "17:00:00",
+      "venue": "VESIT Innovation Lab",
+      "capacity": 3,
+      "description": "Intensive 8-hour sprint building Dockerized microservices and automated CI/CD pipelines.",
+      "banner_image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80",
+      "created_by": 1
+    },
+    {
+      "event_id": 5,
+      "event_name": "VESIT Annual Tech Symphony & Cultural Eve",
+      "category": "Cultural",
+      "date": "2026-09-27",
+      "start_time": "18:00:00",
+      "end_time": "21:30:00",
+      "venue": "College Amphitheatre",
+      "capacity": 250,
+      "description": "An evening celebrating campus talent, musical performances, live rock bands, and student innovation awards.",
+      "banner_image": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=800&q=80",
+      "created_by": 1
+    }
+  ],
+  "registrations": [
+    {
+      "registration_id": 1,
+      "user_id": 2,
+      "event_id": 1,
+      "status": "confirmed",
+      "waitlist_position": 0,
+      "qr_code_token": "QR-EVT1-USR2-89472",
+      "attendance_status": "present",
+      "check_in_time": "2026-09-25 09:55:00",
+      "registration_date": "2026-09-10 12:00:00"
+    },
+    {
+      "registration_id": 2,
+      "user_id": 3,
+      "event_id": 1,
+      "status": "confirmed",
+      "waitlist_position": 0,
+      "qr_code_token": "QR-EVT1-USR3-21948",
+      "attendance_status": "absent",
+      "check_in_time": null,
+      "registration_date": "2026-09-11 14:00:00"
+    },
+    {
+      "registration_id": 3,
+      "user_id": 4,
+      "event_id": 1,
+      "status": "confirmed",
+      "waitlist_position": 0,
+      "qr_code_token": "QR-EVT1-USR4-73821",
+      "attendance_status": "present",
+      "check_in_time": "2026-09-25 10:02:00",
+      "registration_date": "2026-09-12 11:30:00"
+    },
+    {
+      "registration_id": 4,
+      "user_id": 3,
+      "event_id": 3,
+      "status": "confirmed",
+      "waitlist_position": 0,
+      "qr_code_token": "QR-EVT3-USR3-55910",
+      "attendance_status": "absent",
+      "check_in_time": null,
+      "registration_date": "2026-09-12 15:00:00"
+    },
+    {
+      "registration_id": 5,
+      "user_id": 4,
+      "event_id": 3,
+      "status": "confirmed",
+      "waitlist_position": 0,
+      "qr_code_token": "QR-EVT3-USR4-34019",
+      "attendance_status": "absent",
+      "check_in_time": null,
+      "registration_date": "2026-09-13 09:15:00"
+    },
+    {
+      "registration_id": 6,
+      "user_id": 2,
+      "event_id": 4,
+      "status": "confirmed",
+      "waitlist_position": 0,
+      "qr_code_token": "QR-EVT4-USR2-11029",
+      "attendance_status": "absent",
+      "check_in_time": null,
+      "registration_date": "2026-09-14 10:00:00"
+    },
+    {
+      "registration_id": 7,
+      "user_id": 3,
+      "event_id": 4,
+      "status": "confirmed",
+      "waitlist_position": 0,
+      "qr_code_token": "QR-EVT4-USR3-88231",
+      "attendance_status": "absent",
+      "check_in_time": null,
+      "registration_date": "2026-09-14 10:05:00"
+    },
+    {
+      "registration_id": 8,
+      "user_id": 4,
+      "event_id": 4,
+      "status": "confirmed",
+      "waitlist_position": 0,
+      "qr_code_token": "QR-EVT4-USR4-44129",
+      "attendance_status": "absent",
+      "check_in_time": null,
+      "registration_date": "2026-09-14 10:10:00"
+    },
+    {
+      "registration_id": 9,
+      "user_id": 5,
+      "event_id": 4,
+      "status": "waitlisted",
+      "waitlist_position": 1,
+      "qr_code_token": "QR-EVT4-USR5-99201",
+      "attendance_status": "absent",
+      "check_in_time": null,
+      "registration_date": "2026-09-14 10:15:00"
+    }
+  ]
+}

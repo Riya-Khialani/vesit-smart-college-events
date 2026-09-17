@@ -166,6 +166,7 @@ async function registerForEvent(req, res) {
           registration_date: new Date()
         };
         db.getMockData().registrations.push(newReg);
+        if (db.saveStore) db.saveStore();
       } else {
         await db.query(`
           INSERT INTO registrations (user_id, event_id, status, waitlist_position, qr_code_token, attendance_status)
@@ -198,6 +199,7 @@ async function registerForEvent(req, res) {
           registration_date: new Date()
         };
         db.getMockData().registrations.push(newReg);
+        if (db.saveStore) db.saveStore();
       } else {
         await db.query(`
           INSERT INTO registrations (user_id, event_id, status, waitlist_position, qr_code_token, attendance_status)
@@ -293,6 +295,8 @@ async function cancelRegistration(req, res) {
         }
       }
     }
+
+    if (db.saveStore) db.saveStore();
 
     res.json({
       success: true,

@@ -239,6 +239,36 @@ const mockData = {
   ]
 };
 
+const DB_STORE_PATH = path.join(__dirname, '../data/db_store.json');
+
+function saveStore() {
+  try {
+    fs.writeFileSync(DB_STORE_PATH, JSON.stringify(mockData, null, 2), 'utf8');
+  } catch (err) {
+    console.error('[Database] Failed to persist data to disk:', err);
+  }
+}
+
+function loadStore() {
+  try {
+    if (fs.existsSync(DB_STORE_PATH)) {
+      const raw = fs.readFileSync(DB_STORE_PATH, 'utf8');
+      const data = JSON.parse(raw);
+      if (data && Array.isArray(data.users) && Array.isArray(data.events) && Array.isArray(data.registrations)) {
+        mockData.users = data.users;
+        mockData.events = data.events;
+        mockData.registrations = data.registrations;
+        console.log(`[Database] Persistent store loaded: ${mockData.users.length} users, ${mockData.events.length} events, ${mockData.registrations.length} registrations.`);
+        return;
+      }
+    }
+  } catch (err) {
+    console.error('[Database] Could not read persistent store:', err);
+  }
+  // Initialize with base data if store doesn't exist yet
+  saveStore();
+}
+
 async function initDatabase() {
   const dbConfig = {
     host: process.env.DB_HOST || 'localhost',
@@ -262,8 +292,9 @@ async function initDatabase() {
     isUsingFallback = false;
   } catch (err) {
     console.warn(`[Database] MySQL unavailable (${err.code || err.message}).`);
-    console.log('[Database] Connected to High-Performance In-Memory Relational Engine.');
+    console.log('[Database] Connected to High-Performance Persistent JSON Relational Engine.');
     isUsingFallback = true;
+    loadStore();
   }
 }
 
@@ -271,6 +302,7 @@ async function initDatabase() {
 const db = {
   isFallback: () => isUsingFallback,
   getMockData: () => mockData,
+  saveStore: saveStore,
   init: initDatabase,
   query: async (sql, params = []) => {
     if (pool && !isUsingFallback) {
@@ -284,7 +316,8 @@ const db = {
     }
 
     // Fallback in-memory query handler for essential queries
-    return handleMockQuery(sql, params);
+    const result = handleMockQuery(sql, params);
+    return result;
   }
 };
 

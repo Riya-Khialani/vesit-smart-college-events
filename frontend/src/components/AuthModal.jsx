@@ -23,13 +23,19 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'register' })
     setIsSubmitting(true);
 
     try {
+      const cleanData = {
+        ...formData,
+        name: (formData.name || '').trim(),
+        email: (formData.email || '').trim().toLowerCase()
+      };
+
       if (mode === 'register') {
-        const success = await registerUser(formData);
+        const success = await registerUser(cleanData);
         if (success) {
           onClose();
         }
       } else {
-        const success = await login(formData.email, formData.password);
+        const success = await login(cleanData.email, formData.password);
         if (success) {
           onClose();
         }
