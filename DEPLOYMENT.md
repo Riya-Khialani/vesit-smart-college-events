@@ -68,7 +68,7 @@ To run it locally on your PC:
    docker-compose up --build
    ```
 4. Access:
-   - Frontend Nginx: `http://localhost:80`
+   - Frontend Web UI (Nginx): `http://localhost:3000`
    - Backend API: `http://localhost:5000`
    - MySQL Database: `localhost:3306`
 

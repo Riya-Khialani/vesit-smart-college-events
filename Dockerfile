@@ -17,15 +17,18 @@ RUN npm run build
 FROM node:20-alpine AS runner
 WORKDIR /app
 
+# Ensure proper non-root ownership
+RUN chown -R node:node /app
+
 # Install backend production dependencies
-COPY backend/package*.json ./backend/
+COPY --chown=node:node backend/package*.json ./backend/
 RUN cd backend && npm ci --only=production
 
 # Copy backend application source
-COPY backend/ ./backend/
+COPY --chown=node:node backend/ ./backend/
 
 # Copy pre-compiled frontend distribution from Stage 1
-COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
+COPY --chown=node:node --from=frontend-builder /app/frontend/dist ./frontend/dist
 
 # Environment variables
 ENV NODE_ENV=production

@@ -2,12 +2,15 @@
 FROM node:20-alpine AS base
 WORKDIR /app
 
+# Ensure correct folder ownership for non-root user
+RUN chown -R node:node /app
+
 # Install dependencies
-COPY package*.json ./
+COPY --chown=node:node package*.json ./
 RUN npm ci --only=production
 
 # Copy source files
-COPY . .
+COPY --chown=node:node . .
 
 # Set environment
 ENV NODE_ENV=production
@@ -25,3 +28,4 @@ USER node
 
 # Start command
 CMD ["node", "src/server.js"]
+
