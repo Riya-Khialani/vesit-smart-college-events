@@ -85,3 +85,19 @@ spec:
   ports:
     - port: 5000
       targetPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  labels:
+    app: college-events
+    tier: backend
+spec:
+  type: ClusterIP
+  selector:
+    app: college-events
+    tier: backend
+  ports:
+    - port: 5000
+      targetPort: 5000

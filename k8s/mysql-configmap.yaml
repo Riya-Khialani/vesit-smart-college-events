@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-initdb-config
+  labels:
+    app: college-events
+    tier: database
+data:
+  init.sql: |
+    -- Smart College Event Management System Database Initialization
+    CREATE DATABASE IF NOT EXISTS college_events;
+    USE college_events;
+
+    -- 1. Users Table
+    CREATE TABLE IF NOT EXISTS users (
+        user_id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        email VARCHAR(100) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        role ENUM('student', 'admin', 'scanner') DEFAULT 'student',
+        department VARCHAR(50) DEFAULT 'CMPN',
+        interests VARCHAR(255) DEFAULT 'AI, Web Development',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- 2. Events Table
+    CREATE TABLE IF NOT EXISTS events (
+        event_id INT AUTO_INCREMENT PRIMARY KEY,
+        event_name VARCHAR(150) NOT NULL,
+        category VARCHAR(50) NOT NULL,
+        date DATE NOT NULL,
+        start_time TIME NOT NULL,
+        end_time TIME NOT NULL,
+        venue VARCHAR(100) NOT NULL,
+        capacity INT NOT NULL DEFAULT 50,
+        is_frozen BOOLEAN DEFAULT FALSE,
+        description TEXT,
+        banner_image VARCHAR(255),
+        created_by INT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- 3. Registrations Table
+    CREATE TABLE IF NOT EXISTS registrations (
+        registration_id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        event_id INT NOT NULL,
+        status ENUM('confirmed', 'waitlisted', 'cancelled') DEFAULT 'confirmed',
+        waitlist_position INT DEFAULT 0,
+        qr_code_token VARCHAR(255) UNIQUE NOT NULL,
+        attendance_status ENUM('absent', 'present') DEFAULT 'absent',
+        check_in_time TIMESTAMP NULL,
+        registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+        FOREIGN KEY (event_id) REFERENCES events(event_id) ON DELETE CASCADE,
+        UNIQUE KEY unique_user_event (user_id, event_id, status)
+    );
+
+    -- Seed Initial Users (Passwords: Admin@123, Scanner@123, Student@123)
+    INSERT INTO users (user_id, name, email, password, role, department, interests) VALUES
+    (1, 'Admin Incharge', 'admin@vesit.edu', '$2a$10$7Hm4q//0u1hED11WNjeW1ODwUcJa9dadfDiEky.839pzIuA6.1edO', 'admin', 'Faculty IT', 'Cloud, AI, DevOps'),
+    (2, 'Riya Khialani', 'riya@vesit.edu', '$2a$10$wHBkNfu3exLAeudRDZjs/uVsCIrj/WFa0lvg4vnTJIW.ARPdMuuCm', 'student', 'CMPN', 'AI, Machine Learning, Cloud'),
+    (3, 'Prachi Lund', 'prachi@vesit.edu', '$2a$10$wHBkNfu3exLAeudRDZjs/uVsCIrj/WFa0lvg4vnTJIW.ARPdMuuCm', 'student', 'IT', 'Web Development, UI/UX'),
+    (4, 'Ankita Kukreja', 'ankita@vesit.edu', '$2a$10$wHBkNfu3exLAeudRDZjs/uVsCIrj/WFa0lvg4vnTJIW.ARPdMuuCm', 'student', 'EXTC', 'IoT, Robotics, AI'),
+    (5, 'Shivam Makhija', 'shivam@vesit.edu', '$2a$10$wHBkNfu3exLAeudRDZjs/uVsCIrj/WFa0lvg4vnTJIW.ARPdMuuCm', 'student', 'CMPN', 'DevOps, Cybersecurity, Cloud'),
+    (6, 'Gate Scanner Volunteer', 'scanner@vesit.edu', '$2a$10$tEksPr0q5EsErxePhCHue.Fs.R/8QGAbhCegfwKvaqiygR6Nsc4Hq', 'scanner', 'Gate 1 Operations', 'Attendance Verification, Security')
+    ON DUPLICATE KEY UPDATE name=VALUES(name);
+
+    -- Seed Initial Events
+    INSERT INTO events (event_id, event_name, category, date, start_time, end_time, venue, capacity, description, banner_image, created_by) VALUES
+    (1, 'AI & Machine Learning Workshop', 'Workshop', '2026-09-25', '10:00:00', '12:00:00', 'Auditorium Hall A', 50, 'Hands-on practical session on deep learning models, neural networks, and generative AI using Python and TensorFlow.', 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=800&q=80', 1),
+    (2, 'Cybersecurity & Ethical Hacking', 'Workshop', '2026-09-25', '11:00:00', '13:00:00', 'Lab 402, 4th Floor', 40, 'Explore network security auditing, penetration testing methodologies, and defensive cyber strategies.', 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80', 1),
+    (3, 'Modern Web Architecture Bootcamp', 'Bootcamp', '2026-09-25', '14:00:00', '16:00:00', 'Seminar Hall B', 60, 'Master React 18, Node microservices, state management, and modern component-driven UI architecture.', 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80', 1),
+    (4, 'Cloud Native DevOps Hackathon', 'Hackathon', '2026-09-26', '09:00:00', '17:00:00', 'VESIT Innovation Lab', 3, 'Intensive 8-hour sprint building Dockerized microservices and automated CI/CD pipelines.', 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80', 1),
+    (5, 'VESIT Annual Tech Symphony & Cultural Eve', 'Cultural', '2026-09-27', '18:00:00', '21:30:00', 'College Amphitheatre', 250, 'An evening celebrating campus talent, musical performances, live rock bands, and student innovation awards.', 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=800&q=80', 1)
+    ON DUPLICATE KEY UPDATE event_name=VALUES(event_name);
+
+    -- Seed Initial Registrations (Initial attendance roster & analytics)
+    INSERT INTO registrations (registration_id, user_id, event_id, status, waitlist_position, qr_code_token, attendance_status, check_in_time) VALUES
+    (1, 2, 1, 'confirmed', 0, 'QR-EVT1-USR2-89472', 'present', '2026-09-25 09:55:00'),
+    (2, 3, 1, 'confirmed', 0, 'QR-EVT1-USR3-21948', 'absent', NULL),
+    (3, 4, 1, 'confirmed', 0, 'QR-EVT1-USR4-73821', 'present', '2026-09-25 10:02:00'),
+    (4, 3, 3, 'confirmed', 0, 'QR-EVT3-USR3-55910', 'absent', NULL),
+    (5, 4, 3, 'confirmed', 0, 'QR-EVT3-USR4-34019', 'absent', NULL),
+    (6, 2, 4, 'confirmed', 0, 'QR-EVT4-USR2-11029', 'absent', NULL),
+    (7, 3, 4, 'confirmed', 0, 'QR-EVT4-USR3-88231', 'absent', NULL),
+    (8, 4, 4, 'confirmed', 0, 'QR-EVT4-USR4-44129', 'absent', NULL),
+    (9, 5, 4, 'waitlisted', 1, 'QR-EVT4-USR5-99201', 'absent', NULL)
+    ON DUPLICATE KEY UPDATE status=VALUES(status);

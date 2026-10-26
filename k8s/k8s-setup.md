@@ -24,8 +24,9 @@ minikube addons enable metrics-server
 Run the manifests in order:
 
 ```bash
-# Step 1: Create Secrets and Persistent Storage
+# Step 1: Create Secrets, ConfigMaps, and Persistent Storage
 kubectl apply -f k8s/mysql-secret.yaml
+kubectl apply -f k8s/mysql-configmap.yaml
 kubectl apply -f k8s/mysql-pvc.yaml
 
 # Step 2: Deploy MySQL Database

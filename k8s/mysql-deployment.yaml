@@ -37,6 +37,8 @@ spec:
           volumeMounts:
             - name: mysql-persistent-storage
               mountPath: /var/lib/mysql
+            - name: mysql-initdb-volume
+              mountPath: /docker-entrypoint-initdb.d
           resources:
             requests:
               cpu: "100m"
@@ -48,11 +50,30 @@ spec:
         - name: mysql-persistent-storage
           persistentVolumeClaim:
             claimName: mysql-pvc
+        - name: mysql-initdb-volume
+          configMap:
+            name: mysql-initdb-config
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: mysql-service
+  labels:
+    app: college-events
+    tier: database
+spec:
+  type: ClusterIP
+  selector:
+    app: college-events
+    tier: database
+  ports:
+    - port: 3306
+      targetPort: 3306
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
   labels:
     app: college-events
     tier: database
